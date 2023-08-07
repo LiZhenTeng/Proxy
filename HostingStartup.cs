@@ -1,7 +1,7 @@
 using Proxy.IServices;
 using Proxy.Services;
 
-//[assembly: HostingStartup(typeof(Proxy.HostingStartup))]
+[assembly: HostingStartup(typeof(Proxy.HostingStartup))]
 namespace Proxy
 {
     public class HostingStartup : IHostingStartup

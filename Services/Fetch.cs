@@ -69,4 +69,33 @@ public class Fetch : IFetch
         return null;
 
     }
+    public async Task<object?> FetchNeteaseCloudMusic(string key, string path, string query)
+    {
+        var value = _cache.Get(key);
+        if (value != null)
+        {
+            return value;
+        }
+        JObject j = JObject.Parse(query);
+        var queryString = string.Join("&", j.Properties().Select(x => $"{x.Name}={x.Value}").ToArray());
+        
+        using var request = new HttpRequestMessage(HttpMethod.Get, j.Count > 1 ? $"{path}?{queryString}" : path)
+        {
+            Headers =
+                {
+                    { Microsoft.Net.Http.Headers.HeaderNames.Accept, "application/json" }
+                }
+        };
+        var client = _clientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            var content = await JsonSerializer.DeserializeAsync<object>(responseStream);
+            if (content != null)
+                return _cache.Set(key, content);
+        }
+        return null;
+
+    }
 }
